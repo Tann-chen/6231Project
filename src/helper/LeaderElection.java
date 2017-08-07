@@ -9,6 +9,7 @@ public class LeaderElection {
 
     private boolean isLeaderFlag = false;
     private boolean isElectingFlag = false;
+
     public String serverName;
     public String serverIP;
     public int serverID;
@@ -27,9 +28,9 @@ public class LeaderElection {
         this.serverPort = serverPort;
         this.leaderElectionPort = leaderElectionPort;
 
-        gm[0] = new helper.ServerInfo("server1", "localhost", 5001, 1, 7001);
-        gm[1] = new helper.ServerInfo("server2", "localhost", 5002, 2, 7002);
-        gm[2] = new helper.ServerInfo("server3", "localhost", 5003, 3, 7003);
+        gm[0] = new helper.ServerInfo("server1", "localhost", 9001, 1, 8001);
+        gm[1] = new helper.ServerInfo("server2", "localhost", 9002, 2, 8002);
+        gm[2] = new helper.ServerInfo("server3", "localhost", 9003, 3, 8003);
         new Thread(rl).start();
     }
 

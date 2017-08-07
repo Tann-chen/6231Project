@@ -24,7 +24,8 @@ public class TimerTaskRun implements Runnable {
     public void run() {
         while (true) {
             long now = System.currentTimeMillis();
-            // 超时时间为3秒，即总共发送3次
+
+            // the expiration time is 3 seconds, aka try 3 times
             if (now - startTime > EXPIRE) {
                 break;
             }

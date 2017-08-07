@@ -8,7 +8,6 @@ import java.net.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
-
 import fifo.MessageQueue;
 import helper.HeartBeat;
 import helper.LeaderElection;
@@ -42,7 +41,6 @@ public class Server2 implements CenterServer {
             schoolServersObjs[i]=center;
         }
 
-        //
         el=new LeaderElection("Server2","localhost",2,5002,7002);
 
         //port number
@@ -81,7 +79,6 @@ public class Server2 implements CenterServer {
                 datagramSocket.close();
         }
     }
-
 
 
     public static void logFile(String fileName, String Operation)throws SecurityException {
