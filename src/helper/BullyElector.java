@@ -21,31 +21,31 @@ public class BullyElector {
 
 
 
-//
-//    public void sentElectionMessage(){
-//
-//        DatagramSocket datagramSocket = null;
-//
-//        try {
-//            datagramSocket = new DatagramSocket(electionPort);
-//            byte[] message = messageString.getBytes();
-//            InetAddress host = InetAddress.getByName("localhost");
-//
-//            DatagramPacket request = new DatagramPacket(message, message.length,host,primaryPortNo);
-//            datagramSocket.send(request);
-//
-//            //get message
-//            byte[] buffer = new byte[1000];
-//            DatagramPacket reply = new DatagramPacket(buffer, buffer.length);
-//            datagramSocket.receive(reply);
-//            replyString=new String(reply.getData()).trim();
-//        } catch (Exception e) {
-//            System.out.println(e.getMessage());
-//        }finally {
-//            if(datagramSocket != null)
-//                datagramSocket.close();
-//        }
-//    }
-//
+
+    public void sentElectionMessage(){
+
+        DatagramSocket datagramSocket = null;
+
+        try {
+            datagramSocket = new DatagramSocket(electionPort);
+            byte[] message = "$ELECTION".getBytes();
+            InetAddress host = InetAddress.getByName("localhost");
+
+            DatagramPacket request = new DatagramPacket(message, message.length,host,electionPort);
+            datagramSocket.send(request);
+
+            //get message
+            byte[] buffer = new byte[1000];
+            DatagramPacket reply = new DatagramPacket(buffer, buffer.length);
+            datagramSocket.receive(reply);
+            replyString=new String(reply.getData()).trim();
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }finally {
+            if(datagramSocket != null)
+                datagramSocket.close();
+        }
+    }
+
 
 }
