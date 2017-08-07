@@ -178,7 +178,7 @@ public class LeaderElection {
             try {
                 Socket electionMessage = new Socket(InetAddress.getByName(gm[2-i].getIP()), gm[2-i].getElection_port());
                 System.out.println( serverName+ " -> " + gm[2-i].getName() + ": respond successfully!");
-                electionMessage.close(); //TODO:很奇怪
+                electionMessage.close();
                 result = true;
             } catch (Exception e) {
                 System.out.println(serverName + " -> " + gm[2-i].getName() + ": no respond!");

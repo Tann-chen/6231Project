@@ -10,13 +10,13 @@ import javax.swing.Timer;
 
 public class HeartBeat implements ActionListener{
 
-    private static int failureDetectorPort=4999;
+    private static int failureDetectorPort=PortDefinition.FailureDetector;
     private Timer timer;
     private int replicaNo;
 
 
     public HeartBeat(int portNo){
-        this.timer= new Timer(1500,this);
+        this.timer= new Timer(2000,this);
         this.replicaNo=portNo;
     }
 
@@ -43,7 +43,7 @@ public class HeartBeat implements ActionListener{
 
             DatagramPacket heartBeatPacket = new DatagramPacket(message, message.length,host,failureDetectorPort);
             datagramSocket.send(heartBeatPacket);
-            System.out.println(replicaNo+"sent a heartbeat");
+            System.out.println(replicaNo+"heartbeat");
 
         } catch (Exception e) {
             System.out.println(e.getMessage());

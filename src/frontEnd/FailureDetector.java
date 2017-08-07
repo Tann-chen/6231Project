@@ -1,15 +1,24 @@
 package frontEnd;
 
+import helper.PortDefinition;
+
+import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.util.ArrayList;
 
 
 public class FailureDetector extends Thread {
+
     private ArrayList<Integer> replicasList;
     private ArrayList<Integer> heartBeatRecords;
-    private int port=4999;      //failureDetector special port
+    private int FD_PORT = PortDefinition.FailureDetector;     //failureDetector special FD_PORT
     private int runsTolerant=2;
+
+    private DatagramSocket datagramSocket = null;
+    private InetAddress inetAddress=null;
+
 
     public FailureDetector(){
         this.replicasList=new ArrayList<Integer>();
@@ -28,13 +37,14 @@ public class FailureDetector extends Thread {
 
     @Override
     public void run() {
-        DatagramSocket datagramSocket = null;
 
         try {
             //create belonging socket
-            datagramSocket = new DatagramSocket(port);
-            byte[] buffer = new byte[500];
+            datagramSocket = new DatagramSocket(FD_PORT);
+            inetAddress=InetAddress.getByName("localhost");
 
+
+            byte[] buffer = new byte[500];
             //listening heatBeat
             while(true){
                 DatagramPacket heartBeat = new DatagramPacket(buffer, buffer.length);
@@ -54,9 +64,17 @@ public class FailureDetector extends Thread {
                         System.out.println("FailureDetector: [ "+replicasList.get(failReplicaIndex)+" ] is crashed !!!");
                         removeServer(failReplicaIndex);
 
-
-
-
+                        //solutions -> start election
+                        int theLastOneHeartBeat=replicasList.get(heartBeatRecords.indexOf(0));
+                        if(theLastOneHeartBeat==5001){
+                            sentMessageForElection(6001);
+                        }
+                        else if(theLastOneHeartBeat==5002){
+                            sentMessageForElection(6002);
+                        }
+                        else if(theLastOneHeartBeat==5003){
+                            sentMessageForElection(6003);
+                        }
                     }
                 }
             }
@@ -85,8 +103,14 @@ public class FailureDetector extends Thread {
     }
 
 
-    public void sentMessageForElection(){
-
+    public void sentMessageForElection(int targetPort){
+        try {
+            byte[] message = "$ELECTION".getBytes();
+            DatagramPacket replyPacket = new DatagramPacket(message, message.length,inetAddress,targetPort);
+            datagramSocket.send(replyPacket);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 }

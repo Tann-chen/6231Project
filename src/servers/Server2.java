@@ -8,13 +8,13 @@ import java.net.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import fifo.MessageQueue;
+
 import helper.HeartBeat;
-import helper.LeaderElection;
+import helper.PortDefinition;
 import records.Record;
 import records.StudentRecord;
 import records.TeacherRecord;
-import thread.UdpHandler;
+import thread.UdpHandler2;
 
 
 public class Server2 implements CenterServer {
@@ -23,9 +23,9 @@ public class Server2 implements CenterServer {
     private static Server2[] schoolServersObjs = new Server2[3];   //this server is centerServer actually
     private HashMap<Character,ArrayList<Record>> records;
     private String name;
-    private static MessageQueue jobQueue;
     private boolean isPrimary;
-    private static LeaderElection el;
+
+
 
     public Server2(String SchoolServer) {
         this.name = SchoolServer;
@@ -41,35 +41,33 @@ public class Server2 implements CenterServer {
             schoolServersObjs[i]=center;
         }
 
-        el=new LeaderElection("Server2","localhost",2,5002,7002);
+        HeartBeat heartBeat =new HeartBeat(PortDefinition.S2_OPEARION_PORT);
+        heartBeat.startUp();
 
-        //port number
-        int port=5002;
-        //heartbeat
-        new HeartBeat(port).startUp();
-
-        //setup the socket
-        DatagramSocket datagramSocket = null;
+        //replica environment
+        DatagramSocket datagramSocket=null;
+        DatagramSocket acknowSocket=null;
+        InetAddress inetAddress;
 
         try {
-            datagramSocket = new DatagramSocket(port);
+            //environment config
+            datagramSocket = new DatagramSocket(PortDefinition.S2_OPEARION_PORT);
+            acknowSocket = new DatagramSocket(PortDefinition.S2_ACKOWLEDGE_PORT);
             InetAddress host = InetAddress.getByName("localhost");
-            byte[] buffer = new byte[1000];
-            jobQueue=new MessageQueue(datagramSocket);
-            jobQueue.start();
 
+
+            byte[] buffer = new byte[1000];
             while(true){
                 DatagramPacket request = new DatagramPacket(buffer, buffer.length);
                 datagramSocket.receive(request);
                 String message=new String(request.getData());
+                System.out.println("receive a message from "+request.getPort());
+                // sent acknow
+                byte[] acknowledge = "200".getBytes();
+                DatagramPacket acknow = new DatagramPacket(acknowledge, acknowledge.length,host,(request.getPort()-1000));
+                datagramSocket.send(acknow);
+                new UdpHandler2(host,datagramSocket,acknowSocket,schoolServersObjs,request).start();
 
-                if(!message.trim().equals("200")){ //acknowledgment
-
-                    byte[] acknowledge = "200".getBytes();
-                    DatagramPacket acknow = new DatagramPacket(acknowledge, acknowledge.length,host,request.getPort());
-                    datagramSocket.send(acknow);
-                    new UdpHandler(host,port,datagramSocket,schoolServersObjs,message);
-                }
             }
         } catch (Exception e) {
             System.out.println(e.getMessage());
@@ -95,8 +93,7 @@ public class Server2 implements CenterServer {
             FileWriter fileWriter = new FileWriter(log, true);
 
             BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
-            bufferedWriter.write(Operation + " "
-                    + dateFormat.format(date));
+            bufferedWriter.write(Operation + " " + dateFormat.format(date));
             bufferedWriter.newLine();
             bufferedWriter.close();
         } catch (IOException e) {
@@ -220,6 +217,7 @@ public class Server2 implements CenterServer {
         Record targetRecord=null;
 
         Collection<ArrayList<Record>>arrayListsSet=records.values();
+
         for(ArrayList<Record> recordArrayListSet : arrayListsSet){
             for(Record record:recordArrayListSet){
                 if(record.recordID.equalsIgnoreCase(recordID))

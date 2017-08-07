@@ -26,7 +26,7 @@ public class Manager{
 			ORB orb = ORB.init(new String[]{"-ORBInitialHost", "localhost", "-ORBInitialPort", "1050"}, null);
 			org.omg.CORBA.Object objRef = orb.resolve_initial_references("NameService");
 			NamingContextExt ncRef = NamingContextExtHelper.narrow(objRef);
-			String name = "frontEnd";
+			String name = "FE";
 			frontEnd = FrontEndHelper.narrow(ncRef.resolve_str(name));
 		} catch (Exception e) {
 			System.out.println("ERROR : " + e) ;

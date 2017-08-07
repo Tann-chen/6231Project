@@ -4,8 +4,7 @@ package frontEnd;
 import DCMS.FrontEnd;
 import DCMS.FrontEndHelper;
 import DCMS.FrontEndPOA;
-import fifo.TimerTaskRun;
-
+import helper.PortDefinition;
 import org.omg.CORBA.ORB;
 import org.omg.CosNaming.NameComponent;
 import org.omg.CosNaming.NamingContextExt;
@@ -15,22 +14,16 @@ import org.omg.PortableServer.POAHelper;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.util.Queue;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
-import fifo.FifoUdpListener;
 
 public class FrontEndImp extends FrontEndPOA {
 
     private static FrontEndImp frontEnd;
-    public static int FIFO_LISTEN_PORT_NBR = 4999;
-    public static int primary_port_nbr = 5001;
-    public static int msgId = 10000;
+    public static final int FIFO_LISTEN_PORT_NBR = 4999;
+    public static int primary_port_nbr = PortDefinition.S1_OPEARION_PORT;
+    public static int msgId = 1000;
 
-    private FrontEndImp() {
-    }
+    private FrontEndImp() {}
 
     //singleton
     public static FrontEndImp getFrontEnd() {
@@ -40,22 +33,6 @@ public class FrontEndImp extends FrontEndPOA {
     }
 
     public static void main(String[] args) {
-        int frontEndPortNo = 5000;
-
-        //config
-        BullySelector.getBullySelector().addServer(5001);
-        BullySelector.getBullySelector().addServer(5002);
-        BullySelector.getBullySelector().addServer(5003);
-        BullySelector.getBullySelector().startUp();
-
-        //start up the periodical detecting
-
-//        FailureDetector failureDetector=new FailureDetector();
-
-//        failureDetector.addServer(5001);
-//        failureDetector.addServer(5002);
-//        failureDetector.addServer(5003);
-//        failureDetector.start();
 
         //run CORBA and listen requests from clients
         try {
@@ -75,7 +52,7 @@ public class FrontEndImp extends FrontEndPOA {
             // Naming Service (INS) specification.
             NamingContextExt ncRef = NamingContextExtHelper.narrow(objRef);
             // bind the Object Reference in Naming
-            String name = "frontEnd";
+            String name = "FE";
             NameComponent path[] = ncRef.to_name(name);
             ncRef.rebind(path, href);
 
@@ -91,10 +68,8 @@ public class FrontEndImp extends FrontEndPOA {
     }
 
 
+    public void setPrimaryServer(int primaryPortNo) {this.primary_port_nbr = primaryPortNo;}
 
-    public void setPrimaryServer(int primaryPortNo) {
-        this.primary_port_nbr = 5003;
-    }
 
     public synchronized int getMsgIdAndIncre() {
         msgId++;
@@ -102,11 +77,11 @@ public class FrontEndImp extends FrontEndPOA {
     }
 
     @Override
-    public boolean createTRecord(String managerId, String firstName, String lastName, String address, String phone, String specialization, String location) {
+    public boolean createTRecord(String managerId, String firstName, String lastName, String address, String phone, String specialization, String location){
         boolean flag = false;
         String messageString = getMsgIdAndIncre() + ",1," + managerId + "," + firstName + "," + lastName + "," + address + "," + phone + "," + specialization + "," + location;
         String reply = sendMsg2Fifo(messageString);
-        if (reply.equals("SUCCESS")) {
+        if (reply.equals("SUCCESS")){
             flag = true;
         }
         return flag;
@@ -117,7 +92,7 @@ public class FrontEndImp extends FrontEndPOA {
         boolean flag = false;
         String messageString = getMsgIdAndIncre() + ",2," + managerId + "," + firstName + "," + lastName + "," + coursesRegistered + "," + status + "," + date;
         String reply = sendMsg2Fifo(messageString);
-        if (reply.equals("SUCCESS")) {
+        if (reply.equals("SUCCESS")){
             flag = true;
         }
         return flag;
@@ -153,22 +128,23 @@ public class FrontEndImp extends FrontEndPOA {
 
     @Override
     public String getRecordInfo(String manageID, String recordID) {
-        String messageString = getMsgIdAndIncre() + ",7," + manageID + "," + recordID;
+        String messageString = getMsgIdAndIncre() + ",6," + manageID + "," + recordID;
         return sendMsg2Fifo(messageString);
     }
 
 
-    private String sendMsg2Fifo(String messageString) {
+    private String sendMsg2Fifo(String messageString){
         DatagramSocket datagramSocket = null;
         String replyString = null;
 
         try {
-            datagramSocket = new DatagramSocket(4000);
+            datagramSocket = new DatagramSocket(PortDefinition.FE_OPEARION_PORT);
             byte[] message = messageString.getBytes();
             InetAddress host = InetAddress.getByName("localhost");
 
-            DatagramPacket request = new DatagramPacket(message, message.length, host, 5003);
+            DatagramPacket request = new DatagramPacket(message, message.length, host,primary_port_nbr);
             datagramSocket.send(request);
+            System.out.println("sent message ");
 
             //get message
             byte[] buffer = new byte[1000];
@@ -226,6 +202,5 @@ public class FrontEndImp extends FrontEndPOA {
                 datagramSocket.close();
         }
 		return replyString;
-        
     }
 }
