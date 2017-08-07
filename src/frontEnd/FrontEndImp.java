@@ -4,6 +4,8 @@ package frontEnd;
 import DCMS.FrontEnd;
 import DCMS.FrontEndHelper;
 import DCMS.FrontEndPOA;
+import fifo.TimerTaskRun;
+
 import org.omg.CORBA.ORB;
 import org.omg.CosNaming.NameComponent;
 import org.omg.CosNaming.NamingContextExt;
@@ -15,6 +17,10 @@ import org.omg.PortableServer.POAHelper;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.util.Queue;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import fifo.FifoUdpListener;
 
@@ -46,12 +52,12 @@ public class FrontEndImp extends FrontEndPOA {
 
         //start up the periodical detecting
 
-        FailureDetector failureDetector=new FailureDetector();
+//        FailureDetector failureDetector=new FailureDetector();
 
-        failureDetector.addServer(5001);
-        failureDetector.addServer(5002);
-        failureDetector.addServer(5003);
-        failureDetector.start();
+//        failureDetector.addServer(5001);
+//        failureDetector.addServer(5002);
+//        failureDetector.addServer(5003);
+//        failureDetector.start();
 
         //run CORBA and listen requests from clients
         try {
@@ -75,8 +81,8 @@ public class FrontEndImp extends FrontEndPOA {
             NameComponent path[] = ncRef.to_name(name);
             ncRef.rebind(path, href);
 
-            FifoUdpListener fifo = new FifoUdpListener(FIFO_LISTEN_PORT_NBR, primary_port_nbr);
-            fifo.run();
+//            FifoUdpListener fifo = new FifoUdpListener(FIFO_LISTEN_PORT_NBR, primary_port_nbr);
+//            fifo.run();
 
             orb.run();
             System.out.println("------");
@@ -87,8 +93,9 @@ public class FrontEndImp extends FrontEndPOA {
     }
 
 
+
     public void setPrimaryServer(int primaryPortNo) {
-        this.primary_port_nbr = primaryPortNo;
+        this.primary_port_nbr = 5003;
     }
 
     public synchronized int getMsgIdAndIncre() {
@@ -158,24 +165,69 @@ public class FrontEndImp extends FrontEndPOA {
         String replyString = null;
 
         try {
-            datagramSocket = new DatagramSocket();
+            datagramSocket = new DatagramSocket(4000);
             byte[] message = messageString.getBytes();
             InetAddress host = InetAddress.getByName("localhost");
 
-            DatagramPacket request = new DatagramPacket(message, message.length, host, FIFO_LISTEN_PORT_NBR);
+            DatagramPacket request = new DatagramPacket(message, message.length, host, 5003);
             datagramSocket.send(request);
 
             //get message
             byte[] buffer = new byte[1000];
             DatagramPacket reply = new DatagramPacket(buffer, buffer.length);
             datagramSocket.receive(reply);
-            replyString = new String(reply.getData()).trim();
+            
+//            String recvStr = new String(reply.getData()).trim();
+//            // 200 means all RMs processed the task successfully
+//            if (recvStr.equals("200")) {
+//
+//                // clear the clock
+//                Thread thread2 = threadList.remove();
+//                thread2.stop();
+//                System.out.println("Killed");
+//
+//                // send the next task if any
+//                if (queue.size() != 0) {
+//                    queue.remove();
+//
+//                    if (queue.size() != 0) {
+//                        // get the next message
+//                        final String head = queue.peek();
+//
+//                        timerTaskRun = new TimerTaskRun(datagramSocket, head, request);
+//                        Thread thread = new Thread(timerTaskRun);
+//                        threadList.add(thread);
+//                        thread.start();
+//                    }
+//                } else {
+//                }
+//            } else {
+//                // if it's a task message
+//                lock.lock();
+//                queue.add(recvStr);
+//                if (queue.size() == 1) {
+//                    lock.unlock();
+//                    // if the queue was empty, we send the task straight
+//                    final String head = queue.peek();
+//                    timerTaskRun = new TimerTaskRun(datagramSocket, head, request);
+//                    Thread thread = new Thread(timerTaskRun);
+//                    threadList.add(thread);
+//                    thread.start();
+//                } else {
+//                    lock.unlock();
+//                }
+//            }
+            
+            
+            replyString=new String(reply.getData()).trim();
+            System.out.println("reply String:---"+ replyString);
         } catch (Exception e) {
             System.out.println(e.getMessage());
         } finally {
             if (datagramSocket != null)
                 datagramSocket.close();
         }
-        return replyString;
+		return replyString;
+        
     }
 }

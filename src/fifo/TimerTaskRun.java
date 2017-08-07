@@ -24,6 +24,7 @@ public class TimerTaskRun implements Runnable {
     public void run() {
         while (true) {
             long now = System.currentTimeMillis();
+
             // the expiration time is 3 seconds, aka try 3 times
             if (now - startTime > EXPIRE) {
                 break;

@@ -1,11 +1,11 @@
 package helper;
 
 
-
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Scanner;
+
 
 public class ServerListener extends Thread{
     public String serverName ;
@@ -40,7 +40,6 @@ public class ServerListener extends Thread{
                 scan.close();
             }
         } catch (IOException e) {
-
             e.printStackTrace();
         }
     }
