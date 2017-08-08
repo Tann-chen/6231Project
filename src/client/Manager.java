@@ -5,14 +5,10 @@ import DCMS.FrontEndHelper;
 import org.omg.CORBA.ORB;
 import org.omg.CosNaming.NamingContextExt;
 import org.omg.CosNaming.NamingContextExtHelper;
-
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import DCMS.FrontEnd;
-import DCMS.FrontEndHelper;
-import org.omg.CosNaming.NamingContextExt;
 
 
 public class Manager{
@@ -58,7 +54,7 @@ public class Manager{
 		return frontEnd.getRecordInfo(managerID,recordID);
 	}
 
-	private static void writelog(String log){
+	public void writelog(String log){
 		try {
 			synchronized (loggingFile) {
 				FileWriter fileWriter = new FileWriter(loggingFile, true);

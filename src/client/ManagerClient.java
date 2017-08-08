@@ -1,5 +1,6 @@
 package client;
 
+import java.util.Date;
 import java.util.Scanner;
 
 public class ManagerClient {
@@ -39,29 +40,45 @@ public class ManagerClient {
 					String specialization = input.next();
 					String location = input.next();
 					result=themanager.createTRecord(firstName,lastName, address, phone, specialization, location);
-					if(result)
+					String log;
+					if(result){
 						System.out.println("Success");
-					else
+						log = (new Date().toString()+" - "+managerID+" - creating a teacher record - Success");
+						themanager.writelog(log);
+					}
+					else{
 						System.out.println("Fail");
+						log = (new Date().toString()+" - "+managerID+" - creating a teacher record - Fail");
+						themanager.writelog(log);
+					}
 					break;
 				}
 				case 2: {
-					System.out.println("Enter:firstName lastName courseRegistered status statusDate");
+					System.out.println("Enter:firstName lastName coursesRegistered status statusDate");
 					String firstName = input.next();
 					String lastName = input.next();
 					String courseRegistered = input.next();
 					String status = input.next();
 					String statusDate = input.next();
 					result=themanager.createSRecord(firstName, lastName, courseRegistered, status, statusDate);
-					if(result)
+					String log;
+					if(result){
 						System.out.println("Success");
-					else
+						log = (new Date().toString()+" - "+managerID+" - creating a student record - Success");
+						themanager.writelog(log);
+					}
+					else{
 						System.out.println("Fail");
+						log = (new Date().toString()+" - "+managerID+" - creating a student record - Fail");
+						themanager.writelog(log);
+					}
 					break;
 				}
 				case 3:{
 					String consequence=themanager.getRecordCounts();
 					System.out.println(consequence);
+					String log=(new Date().toString())+" - "+managerID+ " - get records count - result:"+ consequence;
+					themanager.writelog(log);
 					break;
 				}
 				case 4:{
@@ -70,10 +87,16 @@ public class ManagerClient {
 					String fieldName = input.next();
 					String newValue = input.next();
 					result=themanager.editRecord(recordID, fieldName, newValue);
-					if(result)
+					if(result){
 						System.out.println("Success");
-					else
+						String log=(new Date().toString())+" - "+managerID+ "- edit record - "+recordID+" - Success";
+						themanager.writelog(log);
+					}
+					else{
 						System.out.println("Fail");
+						String log=(new Date().toString())+" - "+managerID+ "- edit record - "+recordID+" - Fail";
+						themanager.writelog(log);
+					}
 					break;
 				}
 				case 5: {
@@ -81,10 +104,17 @@ public class ManagerClient {
 					String recordID = input.next();
 					String destinationLocation = input.next();
 					result=themanager.transferRecord(recordID, destinationLocation);
-					if(result)
+					String log;
+					if(result){
 						System.out.println("Success");
-					else
+						log=(new Date().toString())+" - "+managerID+ "- transfer record - "+recordID+" - Success";
+						themanager.writelog(log);
+					}
+					else{
 						System.out.println("Fail");
+						log=(new Date().toString())+" - "+managerID+ "- transfer record - "+recordID+" - Fail";
+						themanager.writelog(log);
+					}
 					break;
 				}
 				case 6:{
@@ -98,6 +128,8 @@ public class ManagerClient {
 					System.out.println("Enter: recordID");
 					String recordID = input.next();
 					System.out.println(themanager.getRecordInfo(recordID));
+					String log=(new Date().toString())+" - "+managerID+ " - get records information - Success";
+					themanager.writelog(log);
 					break;
 				}
 				case 0:
