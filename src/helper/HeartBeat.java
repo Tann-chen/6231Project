@@ -16,7 +16,7 @@ public class HeartBeat implements ActionListener{
 
 
     public HeartBeat(int portNo){
-        this.timer= new Timer(2000,this);
+        this.timer= new Timer(3000,this);
         this.replicaNo=portNo;
     }
 
@@ -43,7 +43,7 @@ public class HeartBeat implements ActionListener{
 
             DatagramPacket heartBeatPacket = new DatagramPacket(message, message.length,host,failureDetectorPort);
             datagramSocket.send(heartBeatPacket);
-            System.out.println(replicaNo+"heartbeat");
+            System.out.println("heartbeat : "+replicaNo+" is live");
 
         } catch (Exception e) {
             System.out.println(e.getMessage());

@@ -3,7 +3,7 @@ package thread;
 
 import helper.PortDefinition;
 import helper.Timeout;
-import servers.Server4;
+import servers.Server1;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -19,7 +19,7 @@ public class UdpHandler1 extends Thread {
     private DatagramSocket acknowSocket;
     private InetAddress myinetAddress;
     //for one message
-    private Server4 server;
+    private Server1 server;
     private DatagramPacket datagramPacket;
     //for server4
     private static ArrayList<Integer> messageIDs = new ArrayList<Integer>();
@@ -27,7 +27,7 @@ public class UdpHandler1 extends Thread {
     private static Queue<String> messageQueue = new LinkedList<String>();
 
 
-    public UdpHandler1(InetAddress inetAddress, DatagramSocket datagramSocket,DatagramSocket acknowSocket, Server4 replica, DatagramPacket datagramPacket) {
+    public UdpHandler1(InetAddress inetAddress, DatagramSocket datagramSocket, DatagramSocket acknowSocket, Server1 replica, DatagramPacket datagramPacket) {
         this.myDatagramSocket = datagramSocket;
         this.server = replica;
         this.datagramPacket = datagramPacket;
@@ -52,6 +52,9 @@ public class UdpHandler1 extends Thread {
             Timeout timeout = new Timeout(500);
             boolean flag5002 = false;
             boolean flag5003 = false;
+
+            String result = operating(messagePeek);
+            sentMessageForReply(result);
 
             //listening 1s
             timeout.startUp();
@@ -81,8 +84,6 @@ public class UdpHandler1 extends Thread {
                 System.out.println("Server2: [primary] I did not receive acknowledge from 5003,send again");
             }
 
-            String result = operating(messagePeek);
-            sentMessageForReply(result);
             messageQueue.poll();
         }
     }
@@ -146,13 +147,16 @@ public class UdpHandler1 extends Thread {
             byte[] message = content.getBytes();
             DatagramPacket replyPacket = new DatagramPacket(message, message.length, datagramPacket.getAddress(), datagramPacket.getPort());
             myDatagramSocket.send(replyPacket);
+            System.out.println("xxxxxxx");//todo
 
         } catch (IOException e) {
             e.printStackTrace();
         }
+
     }
 
     public void notifyExec(String content, int port) {
+
         try {
             byte[] message = content.getBytes();
             DatagramPacket request = new DatagramPacket(message, message.length, myinetAddress, port);

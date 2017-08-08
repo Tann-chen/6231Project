@@ -3,8 +3,7 @@ package thread;
 
 import helper.PortDefinition;
 import helper.Timeout;
-import servers.Server4;
-import servers.Server5;
+import servers.Server3;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -21,7 +20,7 @@ public class UdpHandler3 extends Thread{
     private DatagramSocket acknowSocket;
     private InetAddress myinetAddress;
     //for one message
-    private Server5 server;
+    private Server3 server;
     private DatagramPacket datagramPacket;
     //for server5
     private static ArrayList<Integer> messageIDs = new ArrayList<Integer>();
@@ -29,7 +28,7 @@ public class UdpHandler3 extends Thread{
     private static Queue<String> messageQueue = new LinkedList<String>();
 
 
-    public UdpHandler3(InetAddress inetAddress, DatagramSocket datagramSocket,DatagramSocket acknowSocket, Server5 replica, DatagramPacket datagramPacket) {
+    public UdpHandler3(InetAddress inetAddress, DatagramSocket datagramSocket, DatagramSocket acknowSocket, Server3 replica, DatagramPacket datagramPacket) {
         this.myDatagramSocket = datagramSocket;
         this.server = replica;
         this.datagramPacket = datagramPacket;
@@ -44,6 +43,7 @@ public class UdpHandler3 extends Thread{
             operating(message);
         }
         else {   //form FE, means primary
+            System.out.println("Receive request from FE");
             String message = new String(datagramPacket.getData());
             messageQueue.offer(message);
             //if many threads, It may not the message added above
@@ -53,6 +53,9 @@ public class UdpHandler3 extends Thread{
             Timeout timeout = new Timeout(500);
             boolean flag5001 = false;
             boolean flag5002 = false;
+
+            String result = operating(messagePeek);
+            sentMessageForReply(result);
 
             //listening 1s
             timeout.startUp();
@@ -82,9 +85,6 @@ public class UdpHandler3 extends Thread{
                 notifyExec(messagePeek, 5002);
                 System.out.println("Server2: [primary] I did not receive acknowledge from 5003,send again");
             }
-
-            String result = operating(messagePeek);
-            sentMessageForReply(result);
             messageQueue.poll();
         }
     }

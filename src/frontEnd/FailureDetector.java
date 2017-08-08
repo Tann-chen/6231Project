@@ -15,6 +15,7 @@ public class FailureDetector extends Thread {
     private ArrayList<Integer> heartBeatRecords;
     private int FD_PORT = PortDefinition.FailureDetector;     //failureDetector special FD_PORT
     private int runsTolerant=2;
+    private int primary=5001;
 
     private DatagramSocket datagramSocket = null;
     private InetAddress inetAddress=null;
@@ -30,9 +31,9 @@ public class FailureDetector extends Thread {
         heartBeatRecords.add(runsTolerant+1);
     }
 
-    private void removeServer(int index){
-        replicasList.remove(index);
-        heartBeatRecords.remove(index);
+
+    public void setPrimary(int primary){
+        this.primary=primary;
     }
 
     @Override
@@ -50,7 +51,7 @@ public class FailureDetector extends Thread {
                 DatagramPacket heartBeat = new DatagramPacket(buffer, buffer.length);
                 datagramSocket.receive(heartBeat);
                 String source=new String(heartBeat.getData());
-                System.out.println("FailureDetector: [ "+source.trim()+" ] is alive");
+                System.out.println("FailureDetector:  "+source.trim()+" is alive");
 
                 recording(source);
 
@@ -61,20 +62,25 @@ public class FailureDetector extends Thread {
                         }
                     }else{
                         int failReplicaIndex=heartBeatRecords.indexOf(runsTolerant+1);   //someone fail
-                        System.out.println("FailureDetector: [ "+replicasList.get(failReplicaIndex)+" ] is crashed !!!");
-                        removeServer(failReplicaIndex);
+                        System.out.println("FailureDetector:  "+replicasList.get(failReplicaIndex)+" is crashed !!!");
 
                         //solutions -> start election
-                        int theLastOneHeartBeat=replicasList.get(heartBeatRecords.indexOf(0));
-                        if(theLastOneHeartBeat==5001){
-                            sentMessageForElection(6001);
+                        if(replicasList.get(failReplicaIndex)==primary){
+                            int theLastOneHeartBeat = replicasList.get(heartBeatRecords.indexOf(0));
+                            if (theLastOneHeartBeat == 5001) {
+                                sentMessageForElection(6001);
+                            } else if (theLastOneHeartBeat == 5002) {
+                                sentMessageForElection(6002);
+                            } else if (theLastOneHeartBeat == 5003) {
+                                sentMessageForElection(6003);
+                            }
                         }
-                        else if(theLastOneHeartBeat==5002){
-                            sentMessageForElection(6002);
+
+                        //restore
+                        for(int i=0;i<heartBeatRecords.size();i++){
+                            heartBeatRecords.set(i,runsTolerant+1);
                         }
-                        else if(theLastOneHeartBeat==5003){
-                            sentMessageForElection(6003);
-                        }
+
                     }
                 }
             }

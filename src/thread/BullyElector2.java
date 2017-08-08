@@ -37,7 +37,7 @@ public class BullyElector2 extends Thread{
                 String message=new String(bullyMessage.getData());
 
                 if(message.trim().equals("$ELECTION")){//be notify to start election
-                    if(bullyMessage.getPort()<myBullyPort && bullyMessage.getPort()!=FE_PORT)
+                    if(bullyMessage.getPort()<myBullyPort && bullyMessage.getPort()!=PortDefinition.FailureDetector)
                         sentMessage("$NO",bullyMessage.getPort());
 
                     String electionMessage="$ELECTION";

@@ -4,25 +4,32 @@ import DCMS.FrontEnd;
 import DCMS.FrontEndHelper;
 import DCMS.FrontEndPOA;
 import helper.PortDefinition;
+import helper.Timeout;
 import org.omg.CORBA.ORB;
 import org.omg.CosNaming.NameComponent;
 import org.omg.CosNaming.NamingContextExt;
 import org.omg.CosNaming.NamingContextExtHelper;
 import org.omg.PortableServer.POA;
 import org.omg.PortableServer.POAHelper;
-import thread.UdpHandler2;
 
+import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.util.ArrayList;
 
 
 public class FrontEndImp extends FrontEndPOA {
 
     private static FrontEndImp frontEnd;
-    public static final int FIFO_LISTEN_PORT_NBR = 4999;
-    public static int primary_port_nbr = PortDefinition.S1_OPEARION_PORT;
+    public static int primaryPortNbr = PortDefinition.S3_OPEARION_PORT;
     public static int msgId = 1000;
+    private static ArrayList<String> historyOprations=new ArrayList<String>();
+    private int index=-1;  //index of historyArr
+
+
+    public static FailureDetector failureDetector;
+
 
     private FrontEndImp() {}
 
@@ -36,12 +43,16 @@ public class FrontEndImp extends FrontEndPOA {
     public static void main(String[] args) {
 
         //config envir
-        FailureDetector failureDetector=new FailureDetector();
+        failureDetector=new FailureDetector();
         failureDetector.addServer(5001);
         failureDetector.addServer(5002);
         failureDetector.addServer(5003);
         failureDetector.start();
 
+        //functions threads
+        listeningForChangingPrimary();
+        InitForServer initForServer=new InitForServer(historyOprations);
+        initForServer.start();
 
 
         //run CORBA and listen requests from clients
@@ -65,20 +76,27 @@ public class FrontEndImp extends FrontEndPOA {
             String name = "FE";
             NameComponent path[] = ncRef.to_name(name);
             ncRef.rebind(path, href);
-
-//            FifoUdpListener fifo = new FifoUdpListener(FIFO_LISTEN_PORT_NBR, primary_port_nbr);
-//            fifo.run();
-
             orb.run();
             System.out.println("------");
         } catch (Exception e) {
             System.err.println("ERROR: " + e);
             e.printStackTrace(System.out);
         }
+
+        try {
+            failureDetector.join();
+        }catch (Exception e){
+            e.getStackTrace();
+        }
     }
 
 
-    public void setPrimaryServer(int primaryPortNo) {this.primary_port_nbr = primaryPortNo;}
+    public void setPrimaryServer(int primaryPortNo) {primaryPortNbr = primaryPortNo;}
+
+    public static void setPrimary(int newPrimary){
+        primaryPortNbr=newPrimary;
+        failureDetector.setPrimary(newPrimary);
+    }
 
 
     public synchronized int getMsgIdAndIncre() {
@@ -90,7 +108,7 @@ public class FrontEndImp extends FrontEndPOA {
     public boolean createTRecord(String managerId, String firstName, String lastName, String address, String phone, String specialization, String location){
         boolean flag = false;
         String messageString = getMsgIdAndIncre() + ",1," + managerId + "," + firstName + "," + lastName + "," + address + "," + phone + "," + specialization + "," + location;
-        String reply = sendMsg2Fifo(messageString);
+        String reply = sendMsgByQueue(messageString);
         if (reply.equals("SUCCESS")){
             flag = true;
         }
@@ -101,7 +119,7 @@ public class FrontEndImp extends FrontEndPOA {
     public boolean createSRecord(String managerId, String firstName, String lastName, String coursesRegistered, String status, String date) {
         boolean flag = false;
         String messageString = getMsgIdAndIncre() + ",2," + managerId + "," + firstName + "," + lastName + "," + coursesRegistered + "," + status + "," + date;
-        String reply = sendMsg2Fifo(messageString);
+        String reply = sendMsgByQueue(messageString);
         if (reply.equals("SUCCESS")){
             flag = true;
         }
@@ -111,14 +129,14 @@ public class FrontEndImp extends FrontEndPOA {
     @Override
     public String getRecordCounts(String managerId) {
         String messageString = getMsgIdAndIncre() + ",3," + managerId;
-        return sendMsg2Fifo(messageString);
+        return sendMsgByQueue(messageString);
     }
 
     @Override
     public boolean editRecord(String managerId, String recordID, String fieldName, String newValue) {
         boolean flag = false;
         String messageString = getMsgIdAndIncre() + ",4," + managerId + "," + recordID + "," + fieldName + "," + newValue;
-        String reply = sendMsg2Fifo(messageString);
+        String reply = sendMsgByQueue(messageString);
         if (reply.equals("SUCCESS")) {
             flag = true;
         }
@@ -126,10 +144,10 @@ public class FrontEndImp extends FrontEndPOA {
     }
 
     @Override
-    public boolean transferRecord(String managerId, String recordID, String remoteCenterServerName) {
+    public boolean transferRecord(String managerId, String recordID, String remoteCenterServerName){
         boolean flag = false;
         String messageString = getMsgIdAndIncre() + ",5," + managerId + "," + recordID + "," + remoteCenterServerName;
-        String reply = sendMsg2Fifo(messageString);
+        String reply = sendMsgByQueue(messageString);
         if (reply.equals("SUCCESS")) {
             flag = true;
         }
@@ -139,72 +157,40 @@ public class FrontEndImp extends FrontEndPOA {
     @Override
     public String getRecordInfo(String manageID, String recordID) {
         String messageString = getMsgIdAndIncre() + ",6," + manageID + "," + recordID;
-        return sendMsg2Fifo(messageString);
+        return sendMsgByQueue(messageString);
     }
 
 
-    private String sendMsg2Fifo(String messageString){
+    private String sendMsgByQueue(String messageString){
+
+        historyOprations.add(messageString);
+        index+=1;
+
         DatagramSocket datagramSocket = null;
         String replyString = null;
-
+        byte[] buffer = new byte[2000];
         try {
             datagramSocket = new DatagramSocket(PortDefinition.FE_OPEARION_PORT);
             byte[] message = messageString.getBytes();
             InetAddress host = InetAddress.getByName("localhost");
+            DatagramPacket request = new DatagramPacket(message, message.length, host, primaryPortNbr);
+            System.out.println("FE: request sent to "+primaryPortNbr);
 
-            DatagramPacket request = new DatagramPacket(message, message.length, host,primary_port_nbr);
             datagramSocket.send(request);
-            System.out.println("sent message ");
+
+//            Timeout timeout=new Timeout(500);
+//            timeout.startUp();
+//            if(listeningForAcknow(timeout)){
+//                datagramSocket.send(request);  //send again
+//            }
+
 
             //get message
-            byte[] buffer = new byte[1000];
             DatagramPacket reply = new DatagramPacket(buffer, buffer.length);
             datagramSocket.receive(reply);
-            
-//            String recvStr = new String(reply.getData()).trim();
-//            // 200 means all RMs processed the task successfully
-//            if (recvStr.equals("200")) {
-//
-//                // clear the clock
-//                Thread thread2 = threadList.remove();
-//                thread2.stop();
-//                System.out.println("Killed");
-//
-//                // send the next task if any
-//                if (queue.size() != 0) {
-//                    queue.remove();
-//
-//                    if (queue.size() != 0) {
-//                        // get the next message
-//                        final String head = queue.peek();
-//
-//                        timerTaskRun = new TimerTaskRun(datagramSocket, head, request);
-//                        Thread thread = new Thread(timerTaskRun);
-//                        threadList.add(thread);
-//                        thread.start();
-//                    }
-//                } else {
-//                }
-//            } else {
-//                // if it's a task message
-//                lock.lock();
-//                queue.add(recvStr);
-//                if (queue.size() == 1) {
-//                    lock.unlock();
-//                    // if the queue was empty, we send the task straight
-//                    final String head = queue.peek();
-//                    timerTaskRun = new TimerTaskRun(datagramSocket, head, request);
-//                    Thread thread = new Thread(timerTaskRun);
-//                    threadList.add(thread);
-//                    thread.start();
-//                } else {
-//                    lock.unlock();
-//                }
-//            }
-            
-            
             replyString=new String(reply.getData()).trim();
-            System.out.println("reply String:---"+ replyString);
+            System.out.println("FE receive result: "+ replyString);
+            buffer = new byte[2000];
         } catch (Exception e) {
             System.out.println(e.getMessage());
         } finally {
@@ -214,7 +200,7 @@ public class FrontEndImp extends FrontEndPOA {
 		return replyString;
     }
 
-    private void changingPrimary(){
+    private static void listeningForChangingPrimary(){
 
         new Thread(new Runnable() {
             @Override
@@ -223,20 +209,19 @@ public class FrontEndImp extends FrontEndPOA {
                 try {
                     swift = new DatagramSocket(PortDefinition.FE_PRIMARY);
                     InetAddress host = InetAddress.getByName("localhost");
-                    byte[] buffer = new byte[200];
+                    byte[] buffer = new byte[2000];
 
                     while(true){
                         DatagramPacket request = new DatagramPacket(buffer, buffer.length);
                         swift.receive(request);
                         String message=new String(request.getData());
-                        System.out.println("receive a message to change primary "+request.getPort());
                         if(message.trim().equals("$PRIMARY")){
-                            primary_port_nbr=(request.getPort()-1000);
+                            setPrimary(request.getPort()-1000);
                         }
+                        System.out.println("Now: the primary is changed to"+ primaryPortNbr);
                     }
                 } catch (Exception e) {
                     System.out.println(e.getMessage());
-                    System.out.println("-------");
                 }finally {
                     if(swift != null)
                         swift.close();
@@ -244,4 +229,29 @@ public class FrontEndImp extends FrontEndPOA {
             }
         }).start();
     }
+
+
+    private boolean listeningForAcknow(Timeout timeout){
+        DatagramSocket acknowSocket =null;
+        boolean flag=false;
+        try{
+            while (timeout.flag){
+                acknowSocket = new DatagramSocket(PortDefinition.FE_ACKOWLEDGE_PORT);
+                byte[] buffer = new byte[500];
+                DatagramPacket reply = new DatagramPacket(buffer, buffer.length);
+                acknowSocket.receive(reply);
+                if(reply.getPort()==primaryPortNbr){
+                    flag=true;
+                    break;
+                }
+            }
+        }catch (IOException e){
+            e.printStackTrace();
+        }finally {
+            if(acknowSocket!=null)
+                acknowSocket.close();
+        }
+        return flag;
+    }
+
 }

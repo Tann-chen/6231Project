@@ -8,7 +8,6 @@ import java.net.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
-
 import helper.HeartBeat;
 import helper.PortDefinition;
 import records.Record;
@@ -41,10 +40,14 @@ public class Server2 implements CenterServer {
             Server2 center = new Server2(SchoolServers[i]);
             schoolServersObjs[i]=center;
         }
+        //sent for histories
+        init();
 
+        //heartbeat
         HeartBeat heartBeat =new HeartBeat(PortDefinition.S2_OPEARION_PORT);
         heartBeat.startUp();
 
+        //bully
         BullyElector1 bullyElector=new BullyElector1(PortDefinition.S2_ELECTION_PORT);
         bullyElector.start();
 
@@ -68,8 +71,16 @@ public class Server2 implements CenterServer {
                 System.out.println("receive a message from "+request.getPort());
                 // sent acknow
                 byte[] acknowledge = "200".getBytes();
-                DatagramPacket acknow = new DatagramPacket(acknowledge, acknowledge.length,host,(request.getPort()-1000));
+
+                DatagramPacket acknow=null;
+
+                if(request.getPort()==PortDefinition.FE_INITIAL_PORT)
+                    acknow = new DatagramPacket(acknowledge, acknowledge.length,host, PortDefinition.FE_INITIAL_PORT);
+                else
+                    acknow = new DatagramPacket(acknowledge, acknowledge.length,host,(request.getPort()-1000));
+
                 datagramSocket.send(acknow);
+
                 new UdpHandler2(host,datagramSocket,acknowSocket,schoolServersObjs,request).start();
                 buffer=new byte[1000];
 
@@ -263,5 +274,24 @@ public class Server2 implements CenterServer {
             }
         }
         return count;
+    }
+
+
+    private static void init(){
+        DatagramSocket socket=null;
+
+        try{
+            socket=new DatagramSocket(PortDefinition.S2_OPEARION_PORT);
+            InetAddress host = InetAddress.getByName("localhost");
+            byte[] message = "$INIT".getBytes();
+            DatagramPacket replyPacket = new DatagramPacket(message, message.length, host,PortDefinition.FE_INITIAL_PORT);
+            socket.send(replyPacket);
+
+        }catch (IOException e){
+            e.printStackTrace();
+        }finally {
+            if(socket!=null)
+                socket.close();
+        }
     }
 }
