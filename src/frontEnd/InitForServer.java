@@ -23,19 +23,18 @@ public class InitForServer extends Thread{
             init = new DatagramSocket(PortDefinition.FE_INITIAL_PORT);
             InetAddress host = InetAddress.getByName("localhost");
             byte[] buffer = new byte[500];
-            int index=0;
+
 
             while(true){
                 DatagramPacket request = new DatagramPacket(buffer, buffer.length);
                 init.receive(request);
                 String message=new String(request.getData());
                 if(message.trim().equals("$INIT")){
-                    index=0;
-                }else if(message.trim().equals("200")){
-                    index++;
-                }
-                if(index<histories.size()){
-                    sentMessage(host,init,histories.get(index),request.getPort());
+                    System.out.println(request.getPort()+"request init work help from FE");
+                    for (int i = 0; i < histories.size(); i++) {
+                        sentMessage(host, init, histories.get(i), request.getPort());
+                    }
+                    System.out.println("FE sent all history to"+request.getPort());
                 }
             }
         } catch (Exception e) {

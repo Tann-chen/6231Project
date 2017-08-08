@@ -5,10 +5,8 @@ import helper.PortDefinition;
 import records.Record;
 import records.StudentRecord;
 import records.TeacherRecord;
-import thread.BullyElector2;
+import thread.BullyElector1;
 import thread.UdpHandler1;
-
-import javax.sound.sampled.Port;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -52,7 +50,7 @@ public class Server1 implements CenterServer{
         heartBeat.startUp();
 
         //bully
-        BullyElector2 bullyElector=new BullyElector2(PortDefinition.S1_ELECTION_PORT);
+        BullyElector1 bullyElector=new BullyElector1(PortDefinition.S1_ELECTION_PORT);
         bullyElector.start();
 
         try {

@@ -15,7 +15,7 @@ public class FailureDetector extends Thread {
     private ArrayList<Integer> heartBeatRecords;
     private int FD_PORT = PortDefinition.FailureDetector;     //failureDetector special FD_PORT
     private int runsTolerant=2;
-    private int primary=5001;
+    private int primary=PortDefinition.S3_OPEARION_PORT;
 
     private DatagramSocket datagramSocket = null;
     private InetAddress inetAddress=null;

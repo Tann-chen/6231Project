@@ -42,6 +42,7 @@ public class BullyElector2 extends Thread{
 
                     String electionMessage="$ELECTION";
                     sentMessage(electionMessage,6003);
+                    System.out.println("server2:sent election message to server3");
 
                     if (waiting()){
                         sentMessage("$PRIMARY", PortDefinition.FE_PRIMARY);

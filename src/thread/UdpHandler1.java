@@ -148,7 +148,6 @@ public class UdpHandler1 extends Thread {
             message = content.getBytes();
             DatagramPacket replyPacket = new DatagramPacket(message, message.length, datagramPacket.getAddress(), datagramPacket.getPort());
             myDatagramSocket.send(replyPacket);
-            System.out.println("xxxxxxx");//todo
 
         } catch (IOException e) {
             e.printStackTrace();

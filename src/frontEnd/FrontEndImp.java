@@ -98,6 +98,8 @@ public class FrontEndImp extends FrontEndPOA {
         failureDetector.setPrimary(newPrimary);
     }
 
+    public int getPrimary(){return primaryPortNbr;}
+
 
     public synchronized int getMsgIdAndIncre() {
         msgId++;
@@ -216,7 +218,10 @@ public class FrontEndImp extends FrontEndPOA {
                         swift.receive(request);
                         String message=new String(request.getData());
                         if(message.trim().equals("$PRIMARY")){
-                            setPrimary(request.getPort()-1000);
+                            if(request.getPort()>=6000)
+                                setPrimary(request.getPort()-1000);
+                            else
+                                setPrimary(request.getPort());
                         }
                         System.out.println("Now: the primary is changed to"+ primaryPortNbr);
                     }
