@@ -1,5 +1,6 @@
 package thread;
 
+import helper.PortDefinition;
 import helper.Timeout;
 
 import java.io.IOException;
@@ -36,7 +37,7 @@ public class BullyElector3 extends Thread {
                     if(bullyMessage.getPort()<myBullyPort && bullyMessage.getPort()!=FE_PORT)
                         sentMessage("$NO",bullyMessage.getPort());
 
-                    sentMessage("$PRIMARY",FE_PORT);
+                    sentMessage("$PRIMARY", PortDefinition.FE_PRIMARY);
                 }
             }
         } catch (Exception e) {

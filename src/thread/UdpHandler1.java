@@ -107,25 +107,25 @@ public class UdpHandler1 extends Thread {
                 switch (strings[1]) {
                     case "1":
                         boolean flag = server.createTRecord(strings[2], strings[3], strings[4], strings[5], strings[6], strings[7], strings[8]);
-                        result = String.valueOf(flag);
+                        result = castBoolean2Return(flag);
                         break;
                     case "2":
                         flag = server.createSRecord(strings[2], strings[3], strings[4], strings[5], strings[6], strings[7]);
-                        result = String.valueOf(flag);
+                        result = castBoolean2Return(flag);
                         break;
                     case "3":
                         result = server.getRecordCounts(strings[2]);
                         break;
                     case "4":
                         flag = server.editRecord(strings[2], strings[3], strings[4], strings[5]);
-                        result = String.valueOf(flag);
+                        result = castBoolean2Return(flag);
                         break;
                     case "5":
                         flag = server.transferRecord(strings[2], strings[3], strings[4]);
-                        result = String.valueOf(flag);
+                        result = castBoolean2Return(flag);
                         break;
                     case "6":
-                        System.out.println(strings[2]+","+strings[3]);  //todo
+                        System.out.println(strings[2]+","+strings[3]);
                         result = server.getRecordInfo(strings[2], strings[3]);
                         break;
                     default:

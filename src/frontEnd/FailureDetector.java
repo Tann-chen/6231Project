@@ -98,8 +98,10 @@ public class FailureDetector extends Thread {
         }
         if(index!=-1)
             heartBeatRecords.set(index,heartBeatRecords.get(index)-1);
-        else
+        else{
             System.out.println("FailureDetector: receive invalid heartBeat package");
+            System.out.println(source);
+        }
     }
 
 

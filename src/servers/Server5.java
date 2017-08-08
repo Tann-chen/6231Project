@@ -6,6 +6,7 @@ import helper.PortDefinition;
 import records.Record;
 import records.StudentRecord;
 import records.TeacherRecord;
+import thread.BullyElector3;
 import thread.UdpHandler3;
 
 import java.io.BufferedWriter;
@@ -48,6 +49,9 @@ public class Server5 implements CenterServer{
         HeartBeat heartBeat=new HeartBeat(PortDefinition.S3_OPEARION_PORT);
         heartBeat.startUp();
 
+        BullyElector3 bullyElector=new BullyElector3(PortDefinition.S3_ELECTION_PORT);
+        bullyElector.start();
+
 
         try {
             //environment config
@@ -67,6 +71,7 @@ public class Server5 implements CenterServer{
                     DatagramPacket acknow = new DatagramPacket(acknowledge, acknowledge.length,host,(request.getPort()-1000));
                     datagramSocket.send(acknow);
                     new UdpHandler3(host,datagramSocket,acknowSocket,server5,request).start();
+                    buffer=new byte[1000];
                 }
             }
         } catch (Exception e) {
@@ -174,7 +179,7 @@ public class Server5 implements CenterServer{
 
         for(ArrayList<Record> recordArrayListSet:arrayListsSet){
             for(Record record:recordArrayListSet){
-                if(record.recordID.equalsIgnoreCase(recordID))
+                if(record.recordID.equalsIgnoreCase(recordID.trim()))
                     targetRecord=record;
                 break;
             }
@@ -243,7 +248,7 @@ public class Server5 implements CenterServer{
 
         for(ArrayList<Record> recordArrayListSet : arrayListsSet){
             for(Record record:recordArrayListSet){
-                if(record.recordID.equalsIgnoreCase(recordID))
+                if(record.recordID.equalsIgnoreCase(recordID.trim()))
                     targetRecord=record;
                 break;
             }
@@ -340,7 +345,7 @@ public class Server5 implements CenterServer{
 
         for(ArrayList<Record> recordArrayListSet:arrayListsSet){
             for(Record record:recordArrayListSet){
-                if(record.recordID.equalsIgnoreCase(recordID))
+                if(record.recordID.equalsIgnoreCase(recordID.trim()))
                     targetRecord=record;
                 break;
             }

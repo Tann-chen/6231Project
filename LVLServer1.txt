@@ -1,0 +1,6 @@
+Mon Aug 07 16:23:38 EDT 2017 - MTl11111 - creating a student record - SR10001
+Mon Aug 07 16:24:57 EDT 2017 - MTl11111 - creating a teacher record - TR10001
+Mon Aug 07 16:25:02 EDT 2017 - MTl11111 - get records number 
+Mon Aug 07 16:25:32 EDT 2017 - MTl11111 - transferring the record - TR10001 - Fail
+Mon Aug 07 16:25:41 EDT 2017 - MTl11111 - get records number 
+Mon Aug 07 16:25:46 EDT 2017 - MTl11111 - get records number 

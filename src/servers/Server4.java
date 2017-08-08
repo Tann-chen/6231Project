@@ -5,6 +5,7 @@ import helper.PortDefinition;
 import records.Record;
 import records.StudentRecord;
 import records.TeacherRecord;
+import thread.BullyElector2;
 import thread.UdpHandler1;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -34,7 +35,7 @@ public class Server4 implements CenterServer{
         this.LVLServer = new HashMap<>();
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args){
         //config envir
         Server4 server4=new Server4();
         DatagramSocket datagramSocket=null;
@@ -43,6 +44,9 @@ public class Server4 implements CenterServer{
 
         HeartBeat heartBeat=new HeartBeat(PortDefinition.S1_OPEARION_PORT);
         heartBeat.startUp();
+
+        BullyElector2 bullyElector=new BullyElector2(PortDefinition.S1_ELECTION_PORT);
+        bullyElector.start();
 
         try {
             //environment config
@@ -55,12 +59,12 @@ public class Server4 implements CenterServer{
             while(true){
                 DatagramPacket request = new DatagramPacket(buffer, buffer.length);
                 datagramSocket.receive(request);
-                String message=new String(request.getData());
 
                 byte[] acknowledge = "200".getBytes();
                 DatagramPacket acknow = new DatagramPacket(acknowledge, acknowledge.length,host,(request.getPort()-1000));
                 datagramSocket.send(acknow);
                 new UdpHandler1(host,datagramSocket,acknowSocket,server4,request).start();
+                buffer=new byte[1000];
 
             }
         } catch (Exception e) {
@@ -163,7 +167,7 @@ public class Server4 implements CenterServer{
 
         for(ArrayList<Record> recordArrayListSet:arrayListsSet){
             for(Record record:recordArrayListSet){
-                if(record.recordID.equalsIgnoreCase(recordID))
+                if(record.recordID.equalsIgnoreCase(recordID.trim()))
                     targetRecord=record;
                 break;
             }
@@ -257,10 +261,10 @@ public class Server4 implements CenterServer{
         else{
             //remove
             ArrayList<Record> theArrayList = null;
-            if(managerId.startsWith("MTL")){
+            if(managerId.trim().startsWith("MTL")){
                 theArrayList=MTLServer.get(targetRecord.lastName.charAt(0));
             }
-            else if(managerId.startsWith("DDO")){
+            else if(managerId.trim().startsWith("DDO")){
                 theArrayList=DDOServer.get(targetRecord.lastName.charAt(0));
             }
             else{
@@ -271,11 +275,11 @@ public class Server4 implements CenterServer{
 
             //add
             boolean flag = true;
-            if(remoteCenterServerName.startsWith("DDO"))
+            if(remoteCenterServerName.trim().startsWith("DDO"))
                 storingRecord(targetRecord,DDOServer);
-            else if(remoteCenterServerName.startsWith("LVL"))
+            else if(remoteCenterServerName.trim().startsWith("LVL"))
                 storingRecord(targetRecord,LVLServer);
-            else if(remoteCenterServerName.startsWith("MTL"))
+            else if(remoteCenterServerName.trim().startsWith("MTL"))
                 storingRecord(targetRecord,MTLServer);
             else
                 flag=false;

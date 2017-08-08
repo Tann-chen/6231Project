@@ -1,8 +1,8 @@
 package thread;
 
 
+import helper.PortDefinition;
 import helper.Timeout;
-
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -13,7 +13,7 @@ public class BullyElector1 extends Thread{
     private int myBullyPort;
     private DatagramSocket datagramSocket;
     private InetAddress host;
-    private final int FE_PORT=5000;
+    private final int FE_PORT= PortDefinition.FE_OPEARION_PORT;
 
     public BullyElector1(int bullyPort){
         this.myBullyPort =bullyPort;
@@ -44,7 +44,7 @@ public class BullyElector1 extends Thread{
                     sentMessage(electionMessage,6002);
 
                     if (waiting()){
-                        sentMessage("$PRIMARY",FE_PORT);
+                        sentMessage("$PRIMARY",PortDefinition.FE_PRIMARY);
                     }
                 }
             }
@@ -63,6 +63,7 @@ public class BullyElector1 extends Thread{
             byte[] message = content.getBytes();
             DatagramPacket replyPacket = new DatagramPacket(message, message.length, host,targetBullyPort);
             datagramSocket.send(replyPacket);
+
 
         } catch (IOException e) {
             e.printStackTrace();

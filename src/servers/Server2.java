@@ -14,6 +14,7 @@ import helper.PortDefinition;
 import records.Record;
 import records.StudentRecord;
 import records.TeacherRecord;
+import thread.BullyElector1;
 import thread.UdpHandler2;
 
 
@@ -44,6 +45,9 @@ public class Server2 implements CenterServer {
         HeartBeat heartBeat =new HeartBeat(PortDefinition.S2_OPEARION_PORT);
         heartBeat.startUp();
 
+        BullyElector1 bullyElector=new BullyElector1(PortDefinition.S2_ELECTION_PORT);
+        bullyElector.start();
+
         //replica environment
         DatagramSocket datagramSocket=null;
         DatagramSocket acknowSocket=null;
@@ -67,6 +71,7 @@ public class Server2 implements CenterServer {
                 DatagramPacket acknow = new DatagramPacket(acknowledge, acknowledge.length,host,(request.getPort()-1000));
                 datagramSocket.send(acknow);
                 new UdpHandler2(host,datagramSocket,acknowSocket,schoolServersObjs,request).start();
+                buffer=new byte[1000];
 
             }
         } catch (Exception e) {
@@ -137,7 +142,7 @@ public class Server2 implements CenterServer {
         Collection<ArrayList<Record>> arrayListsSet = records.values();
         for (ArrayList<Record> recordArrayListSet : arrayListsSet) {
             for (Record record : recordArrayListSet) {
-                if (record.recordID.equalsIgnoreCase(recordID))
+                if (record.recordID.equalsIgnoreCase(recordID.trim()))
                     targetRecord = record;
                 break;
             }
@@ -161,7 +166,7 @@ public class Server2 implements CenterServer {
 
     @Override
     public boolean transferRecord(String managerID, String recordID, String remoteSchoolServerName) {
-        if (!Arrays.asList(SchoolServers).contains(remoteSchoolServerName.toUpperCase())) {
+        if (!Arrays.asList(SchoolServers).contains(remoteSchoolServerName.trim().toUpperCase())) {
             logFile(this.name, remoteSchoolServerName + " server is not in the list - ERROR");
             return false;
         }
@@ -171,7 +176,7 @@ public class Server2 implements CenterServer {
         Collection<ArrayList<Record>>arrayListsSet=records.values();
         for(ArrayList<Record> recordArrayListSet : arrayListsSet){
             for(Record record:recordArrayListSet){
-                if(record.recordID.equalsIgnoreCase(recordID))
+                if(record.recordID.equalsIgnoreCase(recordID.trim()))
                     targetRecord=record;
                 break;
             }
@@ -220,7 +225,7 @@ public class Server2 implements CenterServer {
 
         for(ArrayList<Record> recordArrayListSet : arrayListsSet){
             for(Record record:recordArrayListSet){
-                if(record.recordID.equalsIgnoreCase(recordID))
+                if(record.recordID.equalsIgnoreCase(recordID.trim()))
                     targetRecord=record;
                 break;
             }

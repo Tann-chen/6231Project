@@ -1,5 +1,6 @@
 package thread;
 
+import helper.PortDefinition;
 import helper.Timeout;
 
 import java.io.IOException;
@@ -43,7 +44,7 @@ public class BullyElector2 extends Thread{
                     sentMessage(electionMessage,6003);
 
                     if (waiting()){
-                        sentMessage("$PRIMARY",FE_PORT);
+                        sentMessage("$PRIMARY", PortDefinition.FE_PRIMARY);
                     }
                 }
             }

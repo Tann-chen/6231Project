@@ -1,6 +1,5 @@
 package frontEnd;
 
-
 import DCMS.FrontEnd;
 import DCMS.FrontEndHelper;
 import DCMS.FrontEndPOA;
@@ -11,6 +10,8 @@ import org.omg.CosNaming.NamingContextExt;
 import org.omg.CosNaming.NamingContextExtHelper;
 import org.omg.PortableServer.POA;
 import org.omg.PortableServer.POAHelper;
+import thread.UdpHandler2;
+
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -33,6 +34,15 @@ public class FrontEndImp extends FrontEndPOA {
     }
 
     public static void main(String[] args) {
+
+        //config envir
+        FailureDetector failureDetector=new FailureDetector();
+        failureDetector.addServer(5001);
+        failureDetector.addServer(5002);
+        failureDetector.addServer(5003);
+        failureDetector.start();
+
+
 
         //run CORBA and listen requests from clients
         try {
@@ -202,5 +212,36 @@ public class FrontEndImp extends FrontEndPOA {
                 datagramSocket.close();
         }
 		return replyString;
+    }
+
+    private void changingPrimary(){
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                DatagramSocket swift=null;
+                try {
+                    swift = new DatagramSocket(PortDefinition.FE_PRIMARY);
+                    InetAddress host = InetAddress.getByName("localhost");
+                    byte[] buffer = new byte[200];
+
+                    while(true){
+                        DatagramPacket request = new DatagramPacket(buffer, buffer.length);
+                        swift.receive(request);
+                        String message=new String(request.getData());
+                        System.out.println("receive a message to change primary "+request.getPort());
+                        if(message.trim().equals("$PRIMARY")){
+                            primary_port_nbr=(request.getPort()-1000);
+                        }
+                    }
+                } catch (Exception e) {
+                    System.out.println(e.getMessage());
+                    System.out.println("-------");
+                }finally {
+                    if(swift != null)
+                        swift.close();
+                }
+            }
+        }).start();
     }
 }

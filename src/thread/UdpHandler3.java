@@ -169,7 +169,7 @@ public class UdpHandler3 extends Thread{
         if(b)
             return "SUCCESS";
         else
-            return "Fail";
+            return "FAIL";
     }
 
 
