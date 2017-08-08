@@ -3,6 +3,7 @@ package servers;
 
 import helper.HeartBeat;
 import helper.PortDefinition;
+import helper.Timeout;
 import records.Record;
 import records.StudentRecord;
 import records.TeacherRecord;
@@ -429,12 +430,19 @@ public class Server3 implements CenterServer{
             DatagramPacket replyPacket = new DatagramPacket(message, message.length, host,PortDefinition.FE_INITIAL_PORT);
             socket.send(replyPacket);
 
+
+            byte[] bullyMsg = "$PRIMARY".getBytes();
+            DatagramPacket bully = new DatagramPacket(bullyMsg, bullyMsg.length, host,PortDefinition.FE_PRIMARY);
+            socket.send(bully);
+
+
         }catch (IOException e){
             e.printStackTrace();
         }finally {
             if(socket!=null)
                 socket.close();
         }
+
     }
 
 }

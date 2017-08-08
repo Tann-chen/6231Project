@@ -13,7 +13,7 @@ import helper.PortDefinition;
 import records.Record;
 import records.StudentRecord;
 import records.TeacherRecord;
-import thread.BullyElector1;
+import thread.BullyElector2;
 import thread.UdpHandler2;
 
 
@@ -48,7 +48,7 @@ public class Server2 implements CenterServer {
         heartBeat.startUp();
 
         //bully
-        BullyElector1 bullyElector=new BullyElector1(PortDefinition.S2_ELECTION_PORT);
+        BullyElector2 bullyElector=new BullyElector2(PortDefinition.S2_ELECTION_PORT);
         bullyElector.start();
 
         //replica environment
