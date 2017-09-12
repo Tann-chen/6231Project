@@ -159,7 +159,8 @@ public class UdpHandler2 extends Thread{
     public void sentMessageForReply(String content){
 
         try {
-            byte[] message = content.getBytes();
+        	byte[] message = new byte[2000]; 
+            message = content.getBytes();
             DatagramPacket replyPacket = new DatagramPacket(message, message.length, datagramPacket.getAddress(),datagramPacket.getPort());
             System.out.println(datagramPacket.getPort());
             myDatagramSocket.send(replyPacket);
