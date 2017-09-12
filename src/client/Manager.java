@@ -58,17 +58,5 @@ public class Manager{
 		return frontEnd.getRecordInfo(managerID,recordID);
 	}
 
-	private static void writelog(String log){
-		try {
-			synchronized (loggingFile) {
-				FileWriter fileWriter = new FileWriter(loggingFile, true);
-				BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
-				bufferedWriter.write(log);
-				bufferedWriter.newLine();
-				bufferedWriter.close();
-			}
-		}catch (IOException e){
-			e.printStackTrace();
-		}
-	}
+
 }

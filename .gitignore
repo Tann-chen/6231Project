@@ -14,3 +14,4 @@ gen
 */.DS_Store
 /src/orb.db/
 
+/orb.db/

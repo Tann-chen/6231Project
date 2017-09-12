@@ -176,7 +176,7 @@ public class Server2 implements CenterServer {
 
 
     @Override
-    public boolean transferRecord(String managerID, String recordID, String remoteSchoolServerName) {
+    public boolean transferRecord(String managerID, String recordID, String remoteSchoolServerName){
         if (!Arrays.asList(SchoolServers).contains(remoteSchoolServerName.trim().toUpperCase())) {
             logFile(this.name, remoteSchoolServerName + " server is not in the list - ERROR");
             return false;

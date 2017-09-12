@@ -98,11 +98,11 @@ public class Server1 implements CenterServer{
         String log=(new Date().toString()+" - "+managerId+" - creating a teacher record - "+teacherRecord.recordID);
         System.out.println(teacherRecord);
 
-        if(managerId.startsWith("MTL")){
+        if(managerId.trim().startsWith("MTL")){
             storingRecord(teacherRecord,MTLServer);
             writeLog(log,loggingFileMTL);
         }
-        else if(managerId.startsWith("DDO")){
+        else if(managerId.trim().startsWith("DDO")){
             storingRecord(teacherRecord,DDOServer);
             writeLog(log,loggingFileDDO);
         }
@@ -122,11 +122,11 @@ public class Server1 implements CenterServer{
 
         String log=(new Date().toString()+" - "+managerId+" - creating a student record - "+studentRecord.recordID);
         System.out.println(studentRecord);
-        if(managerId.startsWith("MTL")){
+        if(managerId.trim().startsWith("MTL")){
             storingRecord(studentRecord,MTLServer);
             writeLog(log,loggingFileMTL);
         }
-        else if(managerId.startsWith("DDO")){
+        else if(managerId.trim().startsWith("DDO")){
             storingRecord(studentRecord,DDOServer);
             writeLog(log,loggingFileDDO);
         }
@@ -147,10 +147,10 @@ public class Server1 implements CenterServer{
 
         //log
         String log=(new Date().toString()+" - "+managerId+" - get records number ");
-        if(managerId.startsWith("MTL")){
+        if(managerId.trim().startsWith("MTL")){
             writeLog(log,loggingFileMTL);
         }
-        else if(managerId.startsWith("DDO")){
+        else if(managerId.trim().startsWith("DDO")){
             writeLog(log,loggingFileDDO);
         }
         else{
@@ -167,10 +167,10 @@ public class Server1 implements CenterServer{
         Record targetRecord=null;
         Collection<ArrayList<Record>> arrayListsSet = null;
 
-        if(managerId.startsWith("MTL")){
+        if(managerId.trim().startsWith("MTL")){
             arrayListsSet=MTLServer.values();
         }
-        else if(managerId.startsWith("DDO")){
+        else if(managerId.trim().startsWith("DDO")){
             arrayListsSet=DDOServer.values();
         }
         else{
@@ -201,10 +201,10 @@ public class Server1 implements CenterServer{
             //log
             String log=(new Date().toString()+" - "+managerId+" - editing the record - "+recordID+" - Success");
 
-            if(managerId.startsWith("MTL")){
+            if(managerId.trim().startsWith("MTL")){
                 writeLog(log,loggingFileMTL);
             }
-            else if(managerId.startsWith("DDO")){
+            else if(managerId.trim().startsWith("DDO")){
                 writeLog(log,loggingFileDDO);
             }
             else{
@@ -216,10 +216,10 @@ public class Server1 implements CenterServer{
             //log
             String log=(new Date().toString()+" - "+managerId+" - editing the record - "+recordID+"- ERROR:Record not exist");
 
-            if(managerId.startsWith("MTL")){
+            if(managerId.trim().startsWith("MTL")){
                 writeLog(log,loggingFileMTL);
             }
-            else if(managerId.startsWith("DDO")){
+            else if(managerId.trim().startsWith("DDO")){
                 writeLog(log,loggingFileDDO);
             }
             else{
@@ -236,10 +236,10 @@ public class Server1 implements CenterServer{
         Record targetRecord=null;
         Collection<ArrayList<Record>> arrayListsSet;
 
-        if(managerId.startsWith("MTL")){
+        if(managerId.trim().startsWith("MTL")){
             arrayListsSet=MTLServer.values();
         }
-        else if(managerId.startsWith("DDO")){
+        else if(managerId.trim().startsWith("DDO")){
             arrayListsSet=DDOServer.values();
         }
         else{
@@ -259,10 +259,10 @@ public class Server1 implements CenterServer{
             String log=(new Date().toString()+" - "+managerId+" - transferring the record - "+recordID+" - "+
                     "Error:record not exist");
 
-            if(managerId.startsWith("MTL")){
+            if(managerId.trim().startsWith("MTL")){
                 writeLog(log,loggingFileMTL);
             }
-            else if(managerId.startsWith("DDO")){
+            else if(managerId.trim().startsWith("DDO")){
                 writeLog(log,loggingFileDDO);
             }
             else{
@@ -273,7 +273,7 @@ public class Server1 implements CenterServer{
         else{
             //remove
             ArrayList<Record> theArrayList = null;
-            if(managerId.trim().startsWith("MTL")){
+            if(managerId.trim().trim().startsWith("MTL")){
                 theArrayList=MTLServer.get(targetRecord.lastName.charAt(0));
             }
             else if(managerId.trim().startsWith("DDO")){
@@ -299,10 +299,10 @@ public class Server1 implements CenterServer{
             if(flag){
                 String log=(new Date().toString()+" - "+managerId+" - transferring the record - "+recordID+" - "+
                         "Success");
-                if(managerId.startsWith("MTL")){
+                if(managerId.trim().startsWith("MTL")){
                     writeLog(log,loggingFileMTL);
                 }
-                else if(managerId.startsWith("DDO")){
+                else if(managerId.trim().startsWith("DDO")){
                     writeLog(log,loggingFileDDO);
                 }
                 else{
@@ -312,10 +312,10 @@ public class Server1 implements CenterServer{
             else{
                 String log=(new Date().toString()+" - "+managerId+" - transferring the record - "+recordID+" - "+
                         "Fail");
-                if(managerId.startsWith("MTL")){
+                if(managerId.trim().startsWith("MTL")){
                     writeLog(log,loggingFileMTL);
                 }
-                else if(managerId.startsWith("DDO")){
+                else if(managerId.trim().startsWith("DDO")){
                     writeLog(log,loggingFileDDO);
                 }
                 else{
@@ -333,10 +333,10 @@ public class Server1 implements CenterServer{
         Record targetRecord=null;
         Collection<ArrayList<Record>> arrayListsSet = null;
 
-        if(managerId.startsWith("MTL")){
+        if(managerId.trim().startsWith("MTL")){
             arrayListsSet=MTLServer.values();
         }
-        else if(managerId.startsWith("DDO")){
+        else if(managerId.trim().startsWith("DDO")){
             arrayListsSet=DDOServer.values();
         }
         else{
@@ -376,10 +376,10 @@ public class Server1 implements CenterServer{
 
         Collection<ArrayList<Record>> arrayListsSet;
 
-        if(serverName.equals("MTL")){
+        if(serverName.trim().equals("MTL")){
             arrayListsSet=MTLServer.values();
         }
-        else if(serverName.equals("DDO")){
+        else if(serverName.trim().equals("DDO")){
             arrayListsSet=DDOServer.values();
         }
         else{

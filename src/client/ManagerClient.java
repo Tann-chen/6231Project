@@ -24,6 +24,7 @@ public class ManagerClient {
 					+"7.Get record info \n"
 					+"0.Quit"
 					);
+
 			input= new Scanner(System.in);
 			String responseLine = input.nextLine();
 			user_input = Integer.parseInt(responseLine.trim());

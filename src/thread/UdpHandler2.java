@@ -108,7 +108,7 @@ public class UdpHandler2 extends Thread{
                 //decide which center
                 int centerIndex=-1;
                 String recordID=strings[2].trim();
-                if(recordID.startsWith("MTL"))//"MTL", "LVL", "DDO"
+                if(recordID.trim().startsWith("MTL"))//"MTL", "LVL", "DDO"
                     centerIndex=0;
                 else if(recordID.startsWith("LVL"))
                     centerIndex=1;
